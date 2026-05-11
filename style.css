@@ -126,12 +126,9 @@ html, body {
     0 12px 40px rgba(26, 61, 92, 0.25),  /* 外阴影,有立体感 */
     inset 0 0 30px rgba(135, 206, 235, 0.15);  /* 内阴影,微妙 */
 
-  /* --- Step 3 新增:让钟表可拖动 --- */
-  cursor: grab;
-  touch-action: none;          /* 关键:禁止 iPad 触摸滚动/缩放,这样 pointermove 能持续触发 */
-}
-.clock:active {
-  cursor: grabbing;
+  /* 关键:禁止 iPad 触摸滚动/缩放,这样分针拖动能流畅触发 */
+  touch-action: none;
+  /* 表盘本身不接受点击事件,只有分针可拖动 */
 }
 
 /* --- 卡通脸:眼睛 --- */
@@ -208,7 +205,34 @@ html, body {
   border-radius: 9999px;  /* 圆头指针 */
   /* 平滑过渡:鼠标点击时丝滑滑过去(拖动时浏览器会跳过 transition) */
   transition: transform 0.15s ease-out;
-  pointer-events: none;   /* 让点击穿透指针,不会挡住 .clock 的事件 */
+  pointer-events: none;   /* 默认指针都不接受事件(让时针完全"只可看") */
+}
+
+/* --- 分针:唯一可拖动的元素 --- */
+.hand-minute {
+  pointer-events: auto;   /* 覆盖 .hand,允许接收触摸 */
+  cursor: grab;
+  z-index: 4;             /* 比时针高一层,确保叠在一起时分针在上 */
+  /* 拖动时禁止 transition,防止指针追不上手指(只在 setRandomTime 时丝滑) */
+  touch-action: none;
+}
+.hand-minute:active {
+  cursor: grabbing;
+}
+
+/* 关键:分针的"隐形胖外套"——扩大触摸区到 ~50px 宽,但视觉不变 */
+.hand-minute::before {
+  content: '';
+  position: absolute;
+  /* 沿指针的整个长度扩展,左右各加 22px,顶端额外加 12px 方便抓尖 */
+  top: -12px;
+  bottom: 0;
+  left: -22px;
+  right: -22px;
+  /* 透明,不影响视觉 */
+  background: transparent;
+  /* 调试时可临时打开,看触摸区在哪:
+     background: rgba(255, 0, 0, 0.15); */
 }
 
 .hand-hour {

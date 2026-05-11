@@ -85,28 +85,25 @@ function updateFromTouch(x, y) {
 }
 
 
-// ====== 6. 监听触摸/鼠标事件 ======
-// pointer 事件统一处理触摸 + 鼠标(iPad 和 Mac 都能用)
+// ====== 6. 监听触摸/鼠标事件(只在分针上,不在表盘上) ======
+// 设计原则:只有分针是"可控的因",时针是"被动的果",空白处无反应。
+// 这样:① 教学聚焦——只有一个可操作对象  ② 触发联动概念——时针自己动,引发"为什么"
 let isDragging = false;
 
-clock.addEventListener('pointerdown', (e) => {
+handMinute.addEventListener('pointerdown', (e) => {
   isDragging = true;
-  clock.setPointerCapture(e.pointerId);  // 锁定指针,即使移出钟表也跟踪
+  handMinute.setPointerCapture(e.pointerId);  // 锁定指针,即使手指移出胖外套也跟踪
   updateFromTouch(e.clientX, e.clientY);
+  e.preventDefault();
 });
 
-clock.addEventListener('pointermove', (e) => {
+handMinute.addEventListener('pointermove', (e) => {
   if (!isDragging) return;
   updateFromTouch(e.clientX, e.clientY);
 });
 
-clock.addEventListener('pointerup', () => {
-  isDragging = false;
-});
-
-clock.addEventListener('pointercancel', () => {
-  isDragging = false;
-});
+handMinute.addEventListener('pointerup',     () => { isDragging = false; });
+handMinute.addEventListener('pointercancel', () => { isDragging = false; });
 
 
 // ====== 7. 重置按钮:换个随机时间(也走最短路径,避免 360° 倒车) ======
