@@ -1,5 +1,5 @@
 /* ============================================
-   MathPlay - Step 1 骨架样式
+   MathPlay - Step 2 静态钟表样式
    设计原则:儿童友好、大尺寸、防误触、无干扰
    ============================================ */
 
@@ -8,7 +8,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* 禁用 iOS 长按选中、双击缩放、点击高亮 */
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -18,39 +17,41 @@
 html, body {
   width: 100%;
   height: 100%;
-  overflow: hidden;  /* 防止 iPad 上下滑动 */
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
                "Helvetica Neue", "Microsoft YaHei", sans-serif;
-  /* 浅蓝天空渐变 - 顶部明亮,底部稍深,有空间感 */
   background: linear-gradient(180deg, #B8E0FF 0%, #87CEEB 50%, #6FB8E0 100%);
-  /* 锁定为浅色背景,即使用户开了系统暗模式也不变(避免儿童视觉混乱) */
   color: #1a3d5c;
 }
 
-/* --- 主舞台(横屏可见) --- */
+/* ============================================
+   主舞台布局(横屏)
+   ============================================ */
 .stage {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  padding: 1.5vh 2vw;
+  gap: 1.5vh;
 }
 
-.title {
-  font-size: clamp(3rem, 10vw, 8rem);  /* 自适应:小屏 3rem,大屏最大 8rem */
+/* --- 顶部小标题(让位给钟表) --- */
+.page-header {
+  flex-shrink: 0;
+}
+
+.title-small {
+  font-size: clamp(1.5rem, 4vh, 3rem);
   font-weight: 800;
-  letter-spacing: 0.05em;
   display: flex;
   align-items: center;
-  gap: 0.5em;
-  /* 轻微阴影,让标题"漂浮"在背景上 */
-  text-shadow: 0 4px 12px rgba(26, 61, 92, 0.15);
+  gap: 0.4em;
+  text-shadow: 0 2px 6px rgba(26, 61, 92, 0.15);
 }
 
 .title-text {
-  /* 蓝色渐变填充,儿童感 */
   background: linear-gradient(135deg, #1a3d5c 0%, #2e6b9e 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -58,7 +59,6 @@ html, body {
 }
 
 .title-icon {
-  /* emoji 不需要渐变,但加个轻微动效让钟表"活"起来 */
   display: inline-block;
   animation: tick 2s ease-in-out infinite;
 }
@@ -68,19 +68,165 @@ html, body {
   50%      { transform: rotate(3deg); }
 }
 
-.subtitle {
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  font-weight: 500;
-  color: #2e6b9e;
-  letter-spacing: 0.1em;
-  opacity: 0.85;
+/* --- 钟表 + 时间标签的整体容器 --- */
+.clock-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+  width: 100%;
+  min-height: 0;  /* flex 子项 overflow 修复 */
 }
 
-/* --- 竖屏提示(默认隐藏) --- */
+/* ============================================
+   钟表本体
+   ============================================ */
+.clock {
+  /* 正方形,大小取屏幕高度和宽度中较小的一个,留出余量 */
+  --clock-size: min(72vh, 72vw);
+  width: var(--clock-size);
+  height: var(--clock-size);
+
+  position: relative;
+  border-radius: 50%;
+  background: #FFFFFF;
+  /* 多层边框:外深蓝粗边 + 内阴影增加立体感 */
+  border: clamp(6px, 1vh, 12px) solid #1a3d5c;
+  box-shadow:
+    0 12px 40px rgba(26, 61, 92, 0.25),  /* 外阴影,有立体感 */
+    inset 0 0 30px rgba(135, 206, 235, 0.15);  /* 内阴影,微妙 */
+}
+
+/* --- 卡通脸:眼睛 --- */
+.eye {
+  position: absolute;
+  width: 8%;
+  height: 8%;
+  background: #1a3d5c;
+  border-radius: 50%;
+  /* 左右眼:稍偏上,像在"看你" */
+  top: 32%;
+  z-index: 1;
+}
+.eye-left  { left: 32%; }
+.eye-right { right: 32%; }
+
+/* --- 卡通脸:笑脸(用 border-radius 做半圆) --- */
+.smile {
+  position: absolute;
+  width: 28%;
+  height: 14%;
+  /* 只显示底部的弧线 = 笑脸 */
+  border: clamp(3px, 0.6vh, 6px) solid transparent;
+  border-bottom-color: #1a3d5c;
+  border-radius: 50%;
+  /* 居中,稍偏下 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+/* ============================================
+   12 个数字 - 硬编码圆周位置
+   半径 = 距中心 38%,数字本身用 translate 居中到该点
+   ============================================ */
+.number {
+  position: absolute;
+  /* 字号:钟表大小的 8%,自适应缩放 */
+  font-size: calc(var(--clock-size) * 0.09);
+  font-weight: 800;
+  color: #1a3d5c;
+  /* 让每个数字以自己的中心对齐到下面的 top/left 坐标 */
+  transform: translate(-50%, -50%);
+  z-index: 2;  /* 在脸之上,在指针之下 */
+  /* 内边距给点呼吸空间(防止 10/11/12 两位数边缘被裁) */
+  padding: 0 0.1em;
+}
+
+/* 12 个数字的位置:沿半径 38% 的圆周均匀分布(每 30° 一个) */
+.n12 { top: 12%;   left: 50%;   }
+.n1  { top: 17.1%; left: 69%;   }
+.n2  { top: 31%;   left: 82.9%; }
+.n3  { top: 50%;   left: 88%;   }
+.n4  { top: 69%;   left: 82.9%; }
+.n5  { top: 82.9%; left: 69%;   }
+.n6  { top: 88%;   left: 50%;   }
+.n7  { top: 82.9%; left: 31%;   }
+.n8  { top: 69%;   left: 17.1%; }
+.n9  { top: 50%;   left: 12%;   }
+.n10 { top: 31%;   left: 17.1%; }
+.n11 { top: 17.1%; left: 31%;   }
+
+/* ============================================
+   指针 - Step 2 固定指向 12 点(rotate(0deg) = 朝上)
+   关键:transform-origin: bottom center,旋转支点在底部
+   ============================================ */
+.hand {
+  position: absolute;
+  bottom: 50%;            /* 底部对齐到钟表中心 */
+  left: 50%;
+  transform-origin: bottom center;
+  z-index: 3;
+  border-radius: 9999px;  /* 圆头指针 */
+}
+
+.hand-hour {
+  /* 时针:粗、短、深色 */
+  width: clamp(8px, 1.5vh, 14px);
+  height: 28%;            /* 短:从中心向上延伸到约 22% top */
+  background: #1a3d5c;
+  transform: translateX(-50%) rotate(0deg);
+}
+
+.hand-minute {
+  /* 分针:细、长、亮色 */
+  width: clamp(5px, 1vh, 10px);
+  height: 40%;            /* 长:延伸到约 10% top */
+  background: #2e6b9e;
+  transform: translateX(-50%) rotate(0deg);
+}
+
+/* --- 中心圆点(盖住指针根部) --- */
+.center-cap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5%;
+  height: 5%;
+  background: #FFD700;        /* 金黄色,可爱 */
+  border: 3px solid #1a3d5c;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;                  /* 最上层 */
+}
+
+/* ============================================
+   数字时间标签(钟表下方)
+   ============================================ */
+.time-label {
+  flex-shrink: 0;
+  font-size: clamp(2rem, 5vh, 4rem);
+  font-weight: 800;
+  color: #1a3d5c;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.3em 0.8em;
+  border-radius: 9999px;
+  box-shadow: 0 6px 20px rgba(26, 61, 92, 0.2);
+  letter-spacing: 0.05em;
+  /* 等宽数字,看着不抖 */
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   竖屏提示(默认隐藏)
+   ============================================ */
 .rotate-hint {
   display: none;
   position: fixed;
-  inset: 0;  /* 等同于 top/right/bottom/left: 0 */
+  inset: 0;
   background: linear-gradient(180deg, #B8E0FF 0%, #6FB8E0 100%);
   flex-direction: column;
   align-items: center;
@@ -107,7 +253,6 @@ html, body {
   padding: 0 2rem;
 }
 
-/* --- 竖屏切换:隐藏主舞台,显示提示 --- */
 @media (orientation: portrait) {
   .stage {
     display: none;
