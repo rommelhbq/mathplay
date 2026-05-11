@@ -4,8 +4,10 @@
    ============================================ */
 
 // ====== 1. 状态:用一个数字记录"现在几点几分" ======
-// currentMinutes 取值 0-719,代表 12 小时 × 60 分钟 的总分钟数
-// 例:12:00 = 0,1:30 = 90,11:59 = 719
+// currentMinutes 是一个"连续累加"的数字,不限范围(可以是 -50、0、1000、99999...)
+// 为什么不 wrap 到 0-719?因为 CSS transition 只认数字大小,
+//   如果数字突然从 718 跳到 0,CSS 会把角度"反着转回去"(360° 倒车 bug)
+// 解决:让数字一直顺着用户拖动方向变化,显示时间时再做 % 720
 let currentMinutes = 0;
 
 
@@ -19,24 +21,21 @@ const btnReset   = document.getElementById('btn-reset');
 
 // ====== 3. 渲染函数:根据 currentMinutes 重画指针和时间 ======
 function render() {
-  // 拆出小时和分钟
-  const minute = currentMinutes % 60;
-  const hour   = Math.floor(currentMinutes / 60);  // 0-11
+  // --- 计算指针角度(直接用连续值,永远不会跳变) ---
+  // 分针:每分钟 6° → minuteAngle 跟 currentMinutes 同步增长,CSS 看到的永远是平滑变化
+  const minuteAngle = currentMinutes * 6;
+  // 时针:每分钟 0.5° (= 每小时 30°,联动公式)
+  const hourAngle   = currentMinutes * 0.5;
 
-  // --- 计算指针角度 ---
-  // 分针:每分钟 6° (360 / 60)
-  const minuteAngle = minute * 6;
-  // 时针:每小时 30° + 每分钟 0.5° (这就是"联动"!)
-  const hourAngle   = hour * 30 + minute * 0.5;
-
-  // --- 应用到 CSS transform ---
-  // translateX(-50%) 让指针水平居中,rotate() 旋转
   handMinute.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
   handHour.style.transform   = `translateX(-50%) rotate(${hourAngle}deg)`;
 
-  // --- 更新文字时间(12 小时制,12:00 而不是 0:00) ---
+  // --- 显示文字时间:这里才把数字 wrap 到 0-719 范围 ---
+  // ((x % 720) + 720) % 720 处理负数情况(JS 的 % 对负数会返回负值)
+  const wrapped     = ((currentMinutes % 720) + 720) % 720;
+  const minute      = wrapped % 60;
+  const hour        = Math.floor(wrapped / 60);   // 0-11
   const displayHour = hour === 0 ? 12 : hour;
-  // padStart(2, '0') 让分钟永远两位数:5 → "05"
   const displayMin  = String(minute).padStart(2, '0');
   timeLabel.textContent = `${displayHour}:${displayMin}`;
 }
@@ -71,17 +70,16 @@ function pointToMinute(x, y) {
 // ====== 5. 拖动时更新状态(关键:跨 12 点要正确进/退一小时) ======
 function updateFromTouch(x, y) {
   const newMinute = pointToMinute(x, y);
-  const oldMinute = currentMinutes % 60;
+  // 注意:currentMinutes 可能是负数或很大的数,要正确取出"当前是第几分钟"
+  const oldMinute = ((currentMinutes % 60) + 60) % 60;
 
   // 算"最短路径":从 oldMinute 到 newMinute 走哪边更近
   let delta = newMinute - oldMinute;
   if (delta >  30) delta -= 60;  // 比如 58 → 2,直接算是 -56,实际应该是 +4
   if (delta < -30) delta += 60;  // 比如 2 → 58,直接算是 +56,实际应该是 -4
 
+  // 连续累加,绝不 wrap(这就是修复 360° 倒车 bug 的关键)
   currentMinutes += delta;
-
-  // 把 currentMinutes 拉回 0-719 范围(支持 12 小时循环)
-  currentMinutes = ((currentMinutes % 720) + 720) % 720;
 
   render();
 }
@@ -111,10 +109,17 @@ clock.addEventListener('pointercancel', () => {
 });
 
 
-// ====== 7. 重置按钮:换个随机时间 ======
+// ====== 7. 重置按钮:换个随机时间(也走最短路径,避免 360° 倒车) ======
 function setRandomTime() {
-  // 随机 0-719 分钟,但避开 0(12:00)以免和初始一样
-  currentMinutes = Math.floor(Math.random() * 720);
+  // 算当前在 12 小时循环里的位置(0-719)
+  const currentWrapped = ((currentMinutes % 720) + 720) % 720;
+  // 随机一个目标位置
+  const target = Math.floor(Math.random() * 720);
+  // 算最短路径(避免跨 12 点时的反向 360° 倒转)
+  let delta = target - currentWrapped;
+  if (delta >  360) delta -= 720;
+  if (delta < -360) delta += 720;
+  currentMinutes += delta;
   render();
 }
 
