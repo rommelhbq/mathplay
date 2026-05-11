@@ -11,21 +11,42 @@
   <title>MathPlay 🕐 时间小冒险</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<!-- body 上挂 mode 类,CSS 用它来控制哪些元素显示/隐藏 -->
+<body class="mode-sandbox">
 
   <!-- 主舞台:横屏时显示 -->
   <main class="stage">
 
-    <!-- 顶部小标题 + 重置按钮 -->
+    <!-- 顶部:标题 + 模式相关按钮 -->
     <header class="page-header">
       <h1 class="title-small">
         <span class="title-text">MathPlay</span>
         <span class="title-icon">🕐</span>
       </h1>
-      <button class="btn-reset" id="btn-reset" type="button">
-        🔄 换个时间
-      </button>
+
+      <!-- 沙盒模式按钮组 -->
+      <div class="header-buttons mode-sandbox-only">
+        <button class="btn-reset" id="btn-reset" type="button">
+          🔄 换个时间
+        </button>
+        <button class="btn-challenge" id="btn-start-challenge" type="button">
+          🎯 开始挑战
+        </button>
+      </div>
+
+      <!-- 挑战模式按钮组 -->
+      <div class="header-buttons mode-challenge-only">
+        <button class="btn-back" id="btn-back-sandbox" type="button">
+          ← 回沙盒
+        </button>
+      </div>
     </header>
+
+    <!-- 挑战横幅:关卡进度 + 目标时间(仅挑战模式) -->
+    <div class="challenge-banner mode-challenge-only">
+      <div class="banner-progress" id="banner-progress">第 1 关 / 共 3 关</div>
+      <div class="banner-target">把分针拨到 <strong id="banner-target-time">3:00</strong></div>
+    </div>
 
     <!-- 钟表区 -->
     <div class="clock-wrapper">
@@ -50,7 +71,7 @@
         <div class="number n10">10</div>
         <div class="number n11">11</div>
 
-        <!-- 指针(Step 2 固定在 12 点位置) -->
+        <!-- 指针 -->
         <div class="hand hand-hour"></div>
         <div class="hand hand-minute"></div>
 
@@ -58,15 +79,32 @@
         <div class="center-cap"></div>
       </div>
 
-      <!-- 数字时间标签(JS 实时更新) -->
-      <div class="time-label" id="time-label">12:00</div>
+      <!-- 数字时间标签:沙盒模式显示,挑战模式隐藏(防作弊) -->
+      <div class="time-label mode-sandbox-only" id="time-label">12:00</div>
 
-      <!-- 提示 -->
-      <p class="hint-text">💡 用手指拖动分针(细的那根),看时针怎么自己跟着动</p>
+      <!-- 沙盒提示 -->
+      <p class="hint-text mode-sandbox-only">💡 用手指拖动分针(细的那根),看时针怎么自己跟着动</p>
+
+      <!-- 挑战模式:提交按钮 + 提示文字 -->
+      <div class="challenge-actions mode-challenge-only">
+        <p class="challenge-hint" id="challenge-hint">&nbsp;</p>
+        <button class="btn-submit" id="btn-submit" type="button">
+          ✅ 我拨好啦
+        </button>
+      </div>
 
     </div>
 
   </main>
+
+  <!-- 庆祝/提示浮层:满屏中央大字,自动消失 -->
+  <div class="overlay" id="overlay">
+    <div class="overlay-text" id="overlay-text"></div>
+    <div class="overlay-actions" id="overlay-actions"></div>
+  </div>
+
+  <!-- 撒花容器:JS 动态加 .confetti 子元素 -->
+  <div class="confetti-container" id="confetti-container" aria-hidden="true"></div>
 
   <!-- JS:让钟表"活"起来 -->
   <script src="script.js"></script>

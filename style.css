@@ -1,5 +1,5 @@
 /* ============================================
-   MathPlay - Step 2 静态钟表样式
+   MathPlay - Step 4 挑战模式样式
    设计原则:儿童友好、大尺寸、防误触、无干扰
    ============================================ */
 
@@ -23,6 +23,13 @@ html, body {
   background: linear-gradient(180deg, #B8E0FF 0%, #87CEEB 50%, #6FB8E0 100%);
   color: #1a3d5c;
 }
+
+/* ============================================
+   模式显隐:body 上挂 mode-sandbox / mode-challenge
+   用 !important 确保不被其他样式覆盖
+   ============================================ */
+body.mode-sandbox   .mode-challenge-only { display: none !important; }
+body.mode-challenge .mode-sandbox-only   { display: none !important; }
 
 /* ============================================
    主舞台布局(横屏)
@@ -57,27 +64,39 @@ html, body {
   text-shadow: 0 2px 6px rgba(26, 61, 92, 0.15);
 }
 
-/* --- 重置按钮 --- */
-.btn-reset {
+.header-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* --- 通用按钮基础(立体感、可按压) --- */
+.btn-reset, .btn-challenge, .btn-back, .btn-submit {
   font-family: inherit;
   font-size: clamp(1rem, 2.4vh, 1.5rem);
   font-weight: 700;
   color: #1a3d5c;
-  background: #FFD700;          /* 金黄色,显眼 */
   border: 3px solid #1a3d5c;
   border-radius: 9999px;
   padding: 0.5em 1.2em;
   cursor: pointer;
-  box-shadow: 0 4px 0 #1a3d5c;  /* 立体感:像个按下去会弹的按钮 */
+  box-shadow: 0 4px 0 #1a3d5c;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.btn-reset:active {
-  /* 按下去的视觉反馈:往下挪 4px,阴影消失 */
+.btn-reset    { background: #FFD700; }   /* 金黄:换个时间 */
+.btn-challenge{ background: #FF8C42; color: #fff; border-color: #6b3410; box-shadow: 0 4px 0 #6b3410; }  /* 橙:开始挑战 */
+.btn-back     { background: #B8E0FF; }   /* 浅蓝:回沙盒 */
+.btn-submit   { background: #4CAF50; color: #fff; border-color: #1b5e20; box-shadow: 0 4px 0 #1b5e20;
+                font-size: clamp(1.2rem, 3vh, 2rem); padding: 0.6em 1.6em; }
+
+.btn-reset:active, .btn-challenge:active, .btn-back:active, .btn-submit:active {
   transform: translateY(4px);
   box-shadow: 0 0 0 #1a3d5c;
 }
+.btn-challenge:active { box-shadow: 0 0 0 #6b3410; }
+.btn-submit:active    { box-shadow: 0 0 0 #1b5e20; }
 
 .title-text {
   background: linear-gradient(135deg, #1a3d5c 0%, #2e6b9e 100%);
@@ -96,6 +115,39 @@ html, body {
   50%      { transform: rotate(3deg); }
 }
 
+/* ============================================
+   挑战横幅:关卡进度 + 目标时间
+   ============================================ */
+.challenge-banner {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border: 3px solid #FF8C42;
+  border-radius: 1rem;
+  padding: 0.6em 1.4em;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(26, 61, 92, 0.15);
+}
+
+.banner-progress {
+  font-size: clamp(0.9rem, 2vh, 1.3rem);
+  font-weight: 700;
+  color: #FF8C42;
+  margin-bottom: 0.2em;
+}
+
+.banner-target {
+  font-size: clamp(1.2rem, 3vh, 2rem);
+  font-weight: 700;
+  color: #1a3d5c;
+}
+
+.banner-target strong {
+  color: #FF8C42;
+  font-size: 1.2em;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- 钟表 + 时间标签的整体容器 --- */
 .clock-wrapper {
   flex: 1;
@@ -112,7 +164,7 @@ html, body {
    钟表本体
    ============================================ */
 .clock {
-  /* 正方形,大小取屏幕高度和宽度中较小的一个,留出余量 */
+  /* 沙盒大,挑战小一点(给 banner 和按钮腾地方) */
   --clock-size: min(68vh, 68vw);
   width: var(--clock-size);
   height: var(--clock-size);
@@ -120,15 +172,41 @@ html, body {
   position: relative;
   border-radius: 50%;
   background: #FFFFFF;
-  /* 多层边框:外深蓝粗边 + 内阴影增加立体感 */
   border: clamp(6px, 1vh, 12px) solid #1a3d5c;
   box-shadow:
-    0 12px 40px rgba(26, 61, 92, 0.25),  /* 外阴影,有立体感 */
-    inset 0 0 30px rgba(135, 206, 235, 0.15);  /* 内阴影,微妙 */
+    0 12px 40px rgba(26, 61, 92, 0.25),
+    inset 0 0 30px rgba(135, 206, 235, 0.15);
 
-  /* 关键:禁止 iPad 触摸滚动/缩放,这样分针拖动能流畅触发 */
   touch-action: none;
-  /* 表盘本身不接受点击事件,只有分针可拖动 */
+  /* 用 transform 做摇头/弹跳动画时,以中心为支点 */
+  transform-origin: center center;
+}
+
+/* 挑战模式钟表小一点,给 banner + 提交按钮让位 */
+body.mode-challenge .clock {
+  --clock-size: min(54vh, 54vw);
+}
+
+/* --- 答错时:钟表左右摇头 --- */
+.clock.shake {
+  animation: shake 0.5s ease-in-out;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-12px); }
+  40%      { transform: translateX(12px); }
+  60%      { transform: translateX(-8px); }
+  80%      { transform: translateX(8px); }
+}
+
+/* --- 答对时:钟表弹跳 + 发光 --- */
+.clock.celebrate {
+  animation: celebrate 0.6s ease-out;
+}
+@keyframes celebrate {
+  0%   { transform: scale(1); box-shadow: 0 12px 40px rgba(26,61,92,0.25); }
+  40%  { transform: scale(1.08); box-shadow: 0 0 60px rgba(76,175,80,0.6), 0 12px 40px rgba(26,61,92,0.25); }
+  100% { transform: scale(1); box-shadow: 0 12px 40px rgba(26,61,92,0.25); }
 }
 
 /* --- 卡通脸:眼睛 --- */
@@ -138,23 +216,20 @@ html, body {
   height: 8%;
   background: #1a3d5c;
   border-radius: 50%;
-  /* 左右眼:稍偏上,像在"看你" */
   top: 32%;
   z-index: 1;
 }
 .eye-left  { left: 32%; }
 .eye-right { right: 32%; }
 
-/* --- 卡通脸:笑脸(用 border-radius 做半圆) --- */
+/* --- 卡通脸:笑脸 --- */
 .smile {
   position: absolute;
   width: 28%;
   height: 14%;
-  /* 只显示底部的弧线 = 笑脸 */
   border: clamp(3px, 0.6vh, 6px) solid transparent;
   border-bottom-color: #1a3d5c;
   border-radius: 50%;
-  /* 居中,稍偏下 */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -163,22 +238,17 @@ html, body {
 
 /* ============================================
    12 个数字 - 硬编码圆周位置
-   半径 = 距中心 38%,数字本身用 translate 居中到该点
    ============================================ */
 .number {
   position: absolute;
-  /* 字号:钟表大小的 8%,自适应缩放 */
   font-size: calc(var(--clock-size) * 0.09);
   font-weight: 800;
   color: #1a3d5c;
-  /* 让每个数字以自己的中心对齐到下面的 top/left 坐标 */
   transform: translate(-50%, -50%);
-  z-index: 2;  /* 在脸之上,在指针之下 */
-  /* 内边距给点呼吸空间(防止 10/11/12 两位数边缘被裁) */
+  z-index: 2;
   padding: 0 0.1em;
 }
 
-/* 12 个数字的位置:沿半径 38% 的圆周均匀分布(每 30° 一个) */
 .n12 { top: 12%;   left: 50%;   }
 .n1  { top: 17.1%; left: 69%;   }
 .n2  { top: 31%;   left: 82.9%; }
@@ -193,86 +263,85 @@ html, body {
 .n11 { top: 17.1%; left: 31%;   }
 
 /* ============================================
-   指针 - Step 2 固定指向 12 点(rotate(0deg) = 朝上)
-   关键:transform-origin: bottom center,旋转支点在底部
+   指针
    ============================================ */
 .hand {
   position: absolute;
-  bottom: 50%;            /* 底部对齐到钟表中心 */
+  bottom: 50%;
   left: 50%;
   transform-origin: bottom center;
   z-index: 3;
-  border-radius: 9999px;  /* 圆头指针 */
-  /* 平滑过渡:鼠标点击时丝滑滑过去(拖动时浏览器会跳过 transition) */
+  border-radius: 9999px;
   transition: transform 0.15s ease-out;
-  pointer-events: none;   /* 默认指针都不接受事件(让时针完全"只可看") */
+  pointer-events: none;
 }
 
-/* --- 分针:唯一可拖动的元素 --- */
+/* 自动演示模式:指针缓慢丝滑滑到目标(JS 临时加 .demo 类) */
+.hand.demo {
+  transition: transform 1.6s cubic-bezier(0.45, 0, 0.55, 1);
+}
+
 .hand-minute {
-  pointer-events: auto;   /* 覆盖 .hand,允许接收触摸 */
+  pointer-events: auto;
   cursor: grab;
-  z-index: 4;             /* 比时针高一层,确保叠在一起时分针在上 */
-  /* 拖动时禁止 transition,防止指针追不上手指(只在 setRandomTime 时丝滑) */
+  z-index: 4;
   touch-action: none;
 }
 .hand-minute:active {
   cursor: grabbing;
 }
 
-/* 关键:分针的"隐形胖外套"——扩大触摸区到 ~50px 宽,但视觉不变 */
+/* 拖动锁定时:分针不可拖(自动演示/庆祝期间) */
+body.locked .hand-minute {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* 分针的"隐形胖外套"——扩大触摸区到 ~50px 宽 */
 .hand-minute::before {
   content: '';
   position: absolute;
-  /* 沿指针的整个长度扩展,左右各加 22px,顶端额外加 12px 方便抓尖 */
   top: -12px;
   bottom: 0;
   left: -22px;
   right: -22px;
-  /* 透明,不影响视觉 */
   background: transparent;
-  /* 调试时可临时打开,看触摸区在哪:
-     background: rgba(255, 0, 0, 0.15); */
 }
 
 .hand-hour {
-  /* 时针:粗、短、深色 */
   width: clamp(8px, 1.5vh, 14px);
-  height: 28%;            /* 短:从中心向上延伸到约 22% top */
+  height: 28%;
   background: #1a3d5c;
   transform: translateX(-50%) rotate(0deg);
 }
 
 .hand-minute {
-  /* 分针:细、长、亮色 */
   width: clamp(5px, 1vh, 10px);
-  height: 40%;            /* 长:延伸到约 10% top */
+  height: 40%;
   background: #2e6b9e;
   transform: translateX(-50%) rotate(0deg);
 }
 
-/* --- 中心圆点(盖住指针根部) --- */
 .center-cap {
   position: absolute;
   top: 50%;
   left: 50%;
   width: 5%;
   height: 5%;
-  background: #FFD700;        /* 金黄色,可爱 */
+  background: #FFD700;
   border: 3px solid #1a3d5c;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  z-index: 4;                  /* 最上层 */
-  pointer-events: none;        /* 不挡触摸事件 */
+  z-index: 4;
+  pointer-events: none;
 }
 
-/* 数字、眼睛、笑脸也都不挡触摸 */
 .number, .eye, .smile {
   pointer-events: none;
 }
 
 /* ============================================
-   数字时间标签(钟表下方)
+   数字时间标签(沙盒下方)
    ============================================ */
 .time-label {
   flex-shrink: 0;
@@ -284,11 +353,10 @@ html, body {
   border-radius: 9999px;
   box-shadow: 0 6px 20px rgba(26, 61, 92, 0.2);
   letter-spacing: 0.05em;
-  /* 等宽数字,看着不抖 */
   font-variant-numeric: tabular-nums;
 }
 
-/* --- 提示文本(钟表下方一行小字) --- */
+/* --- 提示文本 --- */
 .hint-text {
   flex-shrink: 0;
   font-size: clamp(0.9rem, 1.8vh, 1.2rem);
@@ -300,7 +368,121 @@ html, body {
 }
 
 /* ============================================
-   竖屏提示(默认隐藏)
+   挑战模式:提交按钮 + 提示
+   ============================================ */
+.challenge-actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vh;
+}
+
+.challenge-hint {
+  font-size: clamp(1rem, 2.2vh, 1.5rem);
+  font-weight: 700;
+  color: #FF8C42;
+  min-height: 1.5em;  /* 占位防止跳动 */
+  text-align: center;
+  transition: opacity 0.2s ease;
+}
+
+/* ============================================
+   庆祝/提示浮层(满屏)
+   ============================================ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2rem;
+  background: rgba(26, 61, 92, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.overlay.show {
+  display: flex;
+  pointer-events: auto;
+  animation: overlay-pop 0.4s ease-out;
+}
+
+@keyframes overlay-pop {
+  0%   { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.overlay-text {
+  font-size: clamp(3rem, 10vh, 7rem);
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.overlay-actions button {
+  font-family: inherit;
+  font-size: clamp(1.2rem, 3vh, 2rem);
+  font-weight: 700;
+  padding: 0.6em 1.5em;
+  border-radius: 9999px;
+  border: 3px solid #1a3d5c;
+  background: #FFD700;
+  color: #1a3d5c;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #1a3d5c;
+  -webkit-tap-highlight-color: transparent;
+}
+.overlay-actions button:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #1a3d5c;
+}
+
+/* ============================================
+   撒花动画(JS 动态生成 .confetti 元素)
+   ============================================ */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 200;
+}
+
+.confetti {
+  position: absolute;
+  top: -20px;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0.7;
+  }
+}
+
+/* ============================================
+   竖屏提示
    ============================================ */
 .rotate-hint {
   display: none;
