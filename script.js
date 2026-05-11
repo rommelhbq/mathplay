@@ -237,7 +237,7 @@ function handleCorrect(viaDemo) {
         levelIndex = 0;
         startLevel(levelIndex);
       }},
-      { label: '🏠 回自由玩', onClick: () => {
+      { label: '🏠 返回自由模式', onClick: () => {
         hideOverlay();
         clock.classList.remove('celebrate');
         unlock();

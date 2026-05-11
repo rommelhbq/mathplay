@@ -83,6 +83,8 @@ body.mode-challenge .mode-sandbox-only   { display: none !important; }
   box-shadow: 0 4px 0 #1a3d5c;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
   -webkit-tap-highlight-color: transparent;
+  /* 中文字防换行:文字再长按钮也保持一行,而不是把按钮挤垮 */
+  white-space: nowrap;
 }
 
 .btn-reset    { background: #FFD700; }   /* 金黄:换个时间 */
@@ -444,6 +446,7 @@ body.locked .hand-minute {
   cursor: pointer;
   box-shadow: 0 4px 0 #1a3d5c;
   -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
 }
 .overlay-actions button:active {
   transform: translateY(4px);
