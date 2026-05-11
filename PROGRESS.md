@@ -1,6 +1,7 @@
 # MathPlay 开发进度
 
 > **新会话第一句**:`请先读 SPEC.md、PROGRESS.md、DECISIONS.md,然后等我指示。`
+> 用户可在 [`RESUME_PROMPT.md`](./RESUME_PROMPT.md) 找到完整的开场咒语模板。
 
 ## 当前状态(2026-05-12 暂停于此)
 - **当前阶段**:✅ Step 4 已完成并通过 iPad 验收 + 文案打磨完成
