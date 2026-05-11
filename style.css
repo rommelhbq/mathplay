@@ -1,0 +1,118 @@
+/* ============================================
+   MathPlay - Step 1 骨架样式
+   设计原则:儿童友好、大尺寸、防误触、无干扰
+   ============================================ */
+
+/* --- 重置 --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* 禁用 iOS 长按选中、双击缩放、点击高亮 */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;  /* 防止 iPad 上下滑动 */
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+               "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  /* 浅蓝天空渐变 - 顶部明亮,底部稍深,有空间感 */
+  background: linear-gradient(180deg, #B8E0FF 0%, #87CEEB 50%, #6FB8E0 100%);
+  /* 锁定为浅色背景,即使用户开了系统暗模式也不变(避免儿童视觉混乱) */
+  color: #1a3d5c;
+}
+
+/* --- 主舞台(横屏可见) --- */
+.stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.title {
+  font-size: clamp(3rem, 10vw, 8rem);  /* 自适应:小屏 3rem,大屏最大 8rem */
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  /* 轻微阴影,让标题"漂浮"在背景上 */
+  text-shadow: 0 4px 12px rgba(26, 61, 92, 0.15);
+}
+
+.title-text {
+  /* 蓝色渐变填充,儿童感 */
+  background: linear-gradient(135deg, #1a3d5c 0%, #2e6b9e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.title-icon {
+  /* emoji 不需要渐变,但加个轻微动效让钟表"活"起来 */
+  display: inline-block;
+  animation: tick 2s ease-in-out infinite;
+}
+
+@keyframes tick {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+
+.subtitle {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 500;
+  color: #2e6b9e;
+  letter-spacing: 0.1em;
+  opacity: 0.85;
+}
+
+/* --- 竖屏提示(默认隐藏) --- */
+.rotate-hint {
+  display: none;
+  position: fixed;
+  inset: 0;  /* 等同于 top/right/bottom/left: 0 */
+  background: linear-gradient(180deg, #B8E0FF 0%, #6FB8E0 100%);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  z-index: 999;
+}
+
+.rotate-icon {
+  font-size: clamp(5rem, 20vw, 10rem);
+  animation: rotate-pulse 2s ease-in-out infinite;
+}
+
+@keyframes rotate-pulse {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50%      { transform: rotate(90deg) scale(1.1); }
+}
+
+.rotate-text {
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  font-weight: 700;
+  color: #1a3d5c;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+/* --- 竖屏切换:隐藏主舞台,显示提示 --- */
+@media (orientation: portrait) {
+  .stage {
+    display: none;
+  }
+  .rotate-hint {
+    display: flex;
+  }
+}

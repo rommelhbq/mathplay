@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <!-- iPad 适配:禁用缩放,保持 1:1 视觉比例 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- 加到 iPad 主屏后像 App 一样运行,没有 Safari 地址栏 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="MathPlay">
+  <!-- 防止 iOS 自动识别数字为电话号码(钟表数字会被误识别) -->
+  <meta name="format-detection" content="telephone=no">
+
+  <title>MathPlay 🕐 时间小冒险</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 主舞台:横屏时显示 -->
+  <main class="stage">
+    <h1 class="title">
+      <span class="title-text">MathPlay</span>
+      <span class="title-icon">🕐</span>
+    </h1>
+    <p class="subtitle">时间小冒险</p>
+  </main>
+
+  <!-- 竖屏提示:仅竖屏时显示 -->
+  <div class="rotate-hint" aria-hidden="true">
+    <div class="rotate-icon">🔄</div>
+    <p class="rotate-text">请把 iPad 横过来玩</p>
+  </div>
+
+</body>
+</html>
