@@ -40,6 +40,12 @@ html, body {
 /* --- 顶部小标题(让位给钟表) --- */
 .page-header {
   flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1vw;
 }
 
 .title-small {
@@ -49,6 +55,28 @@ html, body {
   align-items: center;
   gap: 0.4em;
   text-shadow: 0 2px 6px rgba(26, 61, 92, 0.15);
+}
+
+/* --- 重置按钮 --- */
+.btn-reset {
+  font-family: inherit;
+  font-size: clamp(1rem, 2.4vh, 1.5rem);
+  font-weight: 700;
+  color: #1a3d5c;
+  background: #FFD700;          /* 金黄色,显眼 */
+  border: 3px solid #1a3d5c;
+  border-radius: 9999px;
+  padding: 0.5em 1.2em;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #1a3d5c;  /* 立体感:像个按下去会弹的按钮 */
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-reset:active {
+  /* 按下去的视觉反馈:往下挪 4px,阴影消失 */
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #1a3d5c;
 }
 
 .title-text {
@@ -85,7 +113,7 @@ html, body {
    ============================================ */
 .clock {
   /* 正方形,大小取屏幕高度和宽度中较小的一个,留出余量 */
-  --clock-size: min(72vh, 72vw);
+  --clock-size: min(68vh, 68vw);
   width: var(--clock-size);
   height: var(--clock-size);
 
@@ -97,6 +125,13 @@ html, body {
   box-shadow:
     0 12px 40px rgba(26, 61, 92, 0.25),  /* 外阴影,有立体感 */
     inset 0 0 30px rgba(135, 206, 235, 0.15);  /* 内阴影,微妙 */
+
+  /* --- Step 3 新增:让钟表可拖动 --- */
+  cursor: grab;
+  touch-action: none;          /* 关键:禁止 iPad 触摸滚动/缩放,这样 pointermove 能持续触发 */
+}
+.clock:active {
+  cursor: grabbing;
 }
 
 /* --- 卡通脸:眼睛 --- */
@@ -171,6 +206,9 @@ html, body {
   transform-origin: bottom center;
   z-index: 3;
   border-radius: 9999px;  /* 圆头指针 */
+  /* 平滑过渡:鼠标点击时丝滑滑过去(拖动时浏览器会跳过 transition) */
+  transition: transform 0.15s ease-out;
+  pointer-events: none;   /* 让点击穿透指针,不会挡住 .clock 的事件 */
 }
 
 .hand-hour {
@@ -201,6 +239,12 @@ html, body {
   border-radius: 50%;
   transform: translate(-50%, -50%);
   z-index: 4;                  /* 最上层 */
+  pointer-events: none;        /* 不挡触摸事件 */
+}
+
+/* 数字、眼睛、笑脸也都不挡触摸 */
+.number, .eye, .smile {
+  pointer-events: none;
 }
 
 /* ============================================
@@ -218,6 +262,17 @@ html, body {
   letter-spacing: 0.05em;
   /* 等宽数字,看着不抖 */
   font-variant-numeric: tabular-nums;
+}
+
+/* --- 提示文本(钟表下方一行小字) --- */
+.hint-text {
+  flex-shrink: 0;
+  font-size: clamp(0.9rem, 1.8vh, 1.2rem);
+  font-weight: 600;
+  color: #1a3d5c;
+  opacity: 0.75;
+  text-align: center;
+  padding: 0 1rem;
 }
 
 /* ============================================

@@ -16,12 +16,15 @@
   <!-- 主舞台:横屏时显示 -->
   <main class="stage">
 
-    <!-- 顶部小标题 -->
+    <!-- 顶部小标题 + 重置按钮 -->
     <header class="page-header">
       <h1 class="title-small">
         <span class="title-text">MathPlay</span>
         <span class="title-icon">🕐</span>
       </h1>
+      <button class="btn-reset" id="btn-reset" type="button">
+        🔄 换个时间
+      </button>
     </header>
 
     <!-- 钟表区 -->
@@ -55,12 +58,18 @@
         <div class="center-cap"></div>
       </div>
 
-      <!-- 数字时间标签 -->
-      <div class="time-label">12:00</div>
+      <!-- 数字时间标签(JS 实时更新) -->
+      <div class="time-label" id="time-label">12:00</div>
+
+      <!-- 提示 -->
+      <p class="hint-text">💡 用手指摸表盘任意位置,看分针和时针怎么一起动</p>
 
     </div>
 
   </main>
+
+  <!-- JS:让钟表"活"起来 -->
+  <script src="script.js"></script>
 
   <!-- 竖屏提示:仅竖屏时显示 -->
   <div class="rotate-hint" aria-hidden="true">
