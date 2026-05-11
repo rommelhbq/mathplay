@@ -1,5 +1,5 @@
 /* ============================================
-   MathPlay - script.js  (Step 4: 沙盒 + 3 关挑战)
+   MathPlay - script.js  (Step 4: 自由玩 + 3 关挑战)
    核心:状态(state)→ 事件(event)→ 渲染(render)
    ============================================ */
 
@@ -8,7 +8,7 @@
 let currentMinutes = 0;
 
 // 挑战模式相关状态
-let mode         = 'sandbox';   // 'sandbox' | 'challenge'
+let mode         = 'sandbox';   // 'sandbox'(自由玩) | 'challenge'(挑战)
 let levelIndex   = 0;            // 0,1,2 → 关 1,2,3
 let targetMinutes= 0;            // 当前关卡的目标分钟数(0-719)
 let errorCount   = 0;            // 当前关卡的错误次数(3 次后自动演示)
@@ -45,7 +45,7 @@ function render() {
   handMinute.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
   handHour.style.transform   = `translateX(-50%) rotate(${hourAngle}deg)`;
 
-  // 沙盒模式才显示文字时间
+  // 自由玩模式才显示文字时间
   if (mode === 'sandbox') {
     timeLabel.textContent = formatTime(currentMinutes);
   }
@@ -109,7 +109,7 @@ handMinute.addEventListener('pointerup',     () => { isDragging = false; });
 handMinute.addEventListener('pointercancel', () => { isDragging = false; });
 
 
-// ====== 7. 沙盒:换个时间 ======
+// ====== 7. 自由玩:换个时间 ======
 function setRandomTime() {
   const currentWrapped = ((currentMinutes % 720) + 720) % 720;
   const target = Math.floor(Math.random() * 720);
@@ -237,7 +237,7 @@ function handleCorrect(viaDemo) {
         levelIndex = 0;
         startLevel(levelIndex);
       }},
-      { label: '🏠 回沙盒', onClick: () => {
+      { label: '🏠 回自由玩', onClick: () => {
         hideOverlay();
         clock.classList.remove('celebrate');
         unlock();

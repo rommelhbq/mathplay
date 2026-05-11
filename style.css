@@ -87,7 +87,7 @@ body.mode-challenge .mode-sandbox-only   { display: none !important; }
 
 .btn-reset    { background: #FFD700; }   /* 金黄:换个时间 */
 .btn-challenge{ background: #FF8C42; color: #fff; border-color: #6b3410; box-shadow: 0 4px 0 #6b3410; }  /* 橙:开始挑战 */
-.btn-back     { background: #B8E0FF; }   /* 浅蓝:回沙盒 */
+.btn-back     { background: #B8E0FF; }   /* 浅蓝:回自由玩 */
 .btn-submit   { background: #4CAF50; color: #fff; border-color: #1b5e20; box-shadow: 0 4px 0 #1b5e20;
                 font-size: clamp(1.2rem, 3vh, 2rem); padding: 0.6em 1.6em; }
 
@@ -164,7 +164,7 @@ body.mode-challenge .mode-sandbox-only   { display: none !important; }
    钟表本体
    ============================================ */
 .clock {
-  /* 沙盒大,挑战小一点(给 banner 和按钮腾地方) */
+  /* 自由玩大,挑战小一点(给 banner 和按钮腾地方) */
   --clock-size: min(68vh, 68vw);
   width: var(--clock-size);
   height: var(--clock-size);
@@ -341,7 +341,7 @@ body.locked .hand-minute {
 }
 
 /* ============================================
-   数字时间标签(沙盒下方)
+   数字时间标签(自由玩下方)
    ============================================ */
 .time-label {
   flex-shrink: 0;
